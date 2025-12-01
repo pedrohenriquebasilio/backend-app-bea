@@ -59,12 +59,18 @@ async getMonthlySummary() {
   const totalLiters = records.reduce((acc, r) => acc + r.liters, 0);
   const avgPrice = totalLiters > 0 ? totalSpent / totalLiters : 0;
 
-  // projeção pro fim do mês
+  // projeção corrigida — baseada em litros/dia, não em gasto/dia
   const today = now.getDate();
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  const projectedTotal = today > 0 ? (totalSpent / today) * daysInMonth : 0;
 
-  // nome do mês
+  let projectedTotal = 0;
+
+  if (today > 1 && totalLiters > 0) {
+    const avgLitersPerDay = totalLiters / today;
+    const projectedLiters = avgLitersPerDay * daysInMonth;
+    projectedTotal = projectedLiters * avgPrice; // volta pra R$
+  }
+
   const monthName = now.toLocaleDateString('pt-BR', { month: 'long' });
 
   return {
